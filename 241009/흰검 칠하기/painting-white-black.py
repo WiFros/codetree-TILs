@@ -1,38 +1,41 @@
-"""
-아무 타일이나 시작해서 n번의 명령에 걸쳐 움직임. 
-명령은 x L , x R 형태로 주어짐. 타일 치우기 
-타일 색은 덧칠해지면 마지막으로 칠해진 색으로 바뀐다. 타일하나가 흰색과 검은색으로 칠해지면(각 2번씩 이상 w > 2 이고, b > 2 ) 회색으로 바뀜. 흰,검,회 타일 수 출력 
-
-"""
-
 n = int(input())
-current = 0 # 현재 위치
-section = {} # 범위 : [색 리스트] 형태의 딕셔터리
+cnt_b = {}
+cnt_w = {}
+positions = set()
+last_color = {}
+cur = 0
 
 for _ in range(n):
-    distance, direction = tuple(input().split())
-    distance = int(distance)
+    x_str, c = input().split()
+    x = int(x_str)
 
-    if direction == 'R': # 검은색
-        for i in range(current, current + distance):
-            section.setdefault(i,[]).append('b')
-        current += distance
-    else: # 흰색으로 칠하기
-        for i in range(current - distance, current):
-            section.setdefault(i,[]).append('w')
-        current -= distance
+    if c == 'L':
+        while x > 0:
+            positions.add(cur)
+            cnt_w[cur] = cnt_w.get(cur, 0) + 1
+            last_color[cur] = 1  # 1은 흰색을 나타냅니다.
+            x -=1
+            if x > 0:
+                cur -=1
+    else:
+        while x > 0:
+            positions.add(cur)
+            cnt_b[cur] = cnt_b.get(cur, 0) + 1
+            last_color[cur] = 2  # 2는 검은색을 나타냅니다.
+            x -=1
+            if x > 0:
+                cur +=1
 
-white, black, glay = 0,0,0
+w, b, g = 0, 0, 0
 
-for tile, colors in section.items():
-    while_block = colors.count('w')
-    black_block = colors.count('b')
-    
-    if while_block >= 2 and black_block >= 2 : 
-        glay += 1
-    elif colors[-1] == 'w':
-        white += 1
-    elif colors[-1] == 'b':
-        black += 1
+for pos in positions:
+    bw = cnt_b.get(pos, 0)
+    ww = cnt_w.get(pos, 0)
+    if bw >= 2 and ww >= 2:
+        g += 1
+    elif last_color[pos] == 1:
+        w += 1
+    elif last_color[pos] == 2:
+        b += 1
 
-print(white, black, glay)
+print(w, b, g)
