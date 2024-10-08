@@ -8,13 +8,13 @@ for _ in range(n):
     distance = int(distance)
     
     if inst == 'R':  # 오른쪽 이동
-        for _ in range(distance):
-            current += 1
-            visited[current] = visited.get(current, 0) + 1
+        for i in range(1, distance + 1):
+            visited[current + i] = visited.get(current + i, 0) + 1
+        current += distance
     elif inst == 'L':  # 왼쪽 이동
-        for _ in range(distance):
-            current -= 1
-            visited[current] = visited.get(current, 0) + 1
+        for i in range(1, distance + 1):
+            visited[current - i] = visited.get(current - i, 0) + 1
+        current -= distance
 
 # 2번 이상 방문한 좌표 개수를 세기
 count = sum(1 for v in visited.values() if v >= 2)
