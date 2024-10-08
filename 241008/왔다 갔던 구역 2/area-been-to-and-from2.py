@@ -1,21 +1,36 @@
+OFFSET = 1000
+MAX_R = 2000
+
 n = int(input())
-visited = {}  # 좌표에 대한 방문 횟수
+visited = []
+
 current = 0
 
 for _ in range(n):
-    # 명령어를 받아와서 분리
-    distance, inst = input().split()
+    distance, direction = tuple(input().split())
     distance = int(distance)
-    
-    if inst == 'R':  # 오른쪽 이동
-        for i in range(1, distance + 1):
-            visited[current + i] = visited.get(current + i, 0) + 1
-        current += distance
-    elif inst == 'L':  # 왼쪽 이동
-        for i in range(1, distance + 1):
-            visited[current - i] = visited.get(current - i, 0) + 1
-        current -= distance
 
-# 2번 이상 방문한 좌표 개수를 세기
-count = sum(1 for v in visited.values() if v >= 2)
+    if direction == 'L':
+        left_section = current - distance
+        right_section = current
+        current -= distance
+    else:
+        left_section = current
+        right_section = current + distance
+        current += distance
+    
+    visited.append([left_section,right_section])
+
+checked = [0] * (MAX_R + 1)
+
+for x1, x2 in visited:
+    x1,x2 = x1 + OFFSET, x2 + OFFSET
+
+    for i in range(x1,x2):
+        checked[i] += 1
+count = 0
+for element in checked:
+    if element >= 2:
+        count += 1
+
 print(count)
