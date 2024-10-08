@@ -11,6 +11,6 @@ answer = 0
 for i in range(K):
     A, B = map(int, input().split(' '))
     block[A-1:B] = [x + 1 for x in block[A-1:B]]
-    answer = max(block[A-1:B])
 
-print(answer)
+
+print(max(block))
