@@ -48,8 +48,11 @@ class Rudolph:
     def __init__(self,x,y):
         self.x = x
         self.y = y
-
+    def move(x,y):
+    
+       if grid[x][y] == 1 
 class Santa:
+    is_stun = False
     def __init__(self,idx,x,y):
         self.idx = idx
         self.x = x
@@ -58,6 +61,8 @@ class Santa:
 def get_distance(x1,y1,x2,y2):
     return (x1-x2)**2 + (y1-y2)**2
 
+#0 : 빈공간 1 : 루돌프 2 : 산타
+grid = [[0] * N for _ in range(N)]
 
 # N, M, P, C, D
 N, M, P, C, D = tuple(map(int,input().split()))
@@ -65,8 +70,8 @@ Rr, Rc = tuple(map(int,input().split()))
 rudolph = Rudolph(Rr,Rc)
 santa = []
 
-grid = [[0] * N for _ in range(N)]
-
 for _ in range(P):
     Si, Sr, Sc = tuple(input().split())
     santa.append(Santa(Sr,Sc,Si))
+
+for _ in range(M):
