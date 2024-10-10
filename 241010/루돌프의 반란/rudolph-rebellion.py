@@ -37,6 +37,36 @@ M번의 턴. 턴마다 루돌프와 산타들이 한 번 씩 움직임.
  - P명의 산타가 모두 탈락하면 즉시 종료
  - 매턴 탈락하지 않은 산타는 1점씩
 """
+#8방향
+Rdx = [1,-1,0,0,-1,-1,1,1]
+Rdy = [0,0,1,-1,-1,1,-1,1]
+#4방향
+Sdx = [1,-1,0,0]
+Sdy = [0,0,1,-1]
+
+class Rudolph:
+    def __init__(self,x,y):
+        self.x = x
+        self.y = y
+
+class Santa:
+    def __init__(self,idx,x,y):
+        self.idx = idx
+        self.x = x
+        self.y = y
+
+def get_distance(x1,y1,x2,y2):
+    return (x1-x2)**2 + (y1-y2)**2
+
 
 # N, M, P, C, D
-N, M, P, C, D = map(input().split())
+N, M, P, C, D = tuple(map(int,input().split()))
+Rr, Rc = tuple(map(int,input().split()))
+rudolph = Rudolph(Rr,Rc)
+santa = []
+
+grid = [[0] * N for _ in range(N)]
+
+for _ in range(P):
+    Si, Sr, Sc = tuple(input().split())
+    santa.append(Santa(Sr,Sc,Si))
