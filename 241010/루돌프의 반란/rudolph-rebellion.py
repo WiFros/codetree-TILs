@@ -45,14 +45,17 @@ Sdx = [1,-1,0,0]
 Sdy = [0,0,1,-1]
 
 class Rudolph:
-    def __init__(self,x,y):
+    def __init__(self,x,y,power):
         self.x = x
         self.y = y
+        self.power = power
     def move(x,y):
-    
-       if grid[x][y] == 1 
+       if grid[x][y] == 2: # 산타랑 부딛힘.
+    def 
 class Santa:
     is_stun = False
+    score = 0
+    power = 0
     def __init__(self,idx,x,y):
         self.idx = idx
         self.x = x
@@ -67,11 +70,15 @@ grid = [[0] * N for _ in range(N)]
 # N, M, P, C, D
 N, M, P, C, D = tuple(map(int,input().split()))
 Rr, Rc = tuple(map(int,input().split()))
-rudolph = Rudolph(Rr,Rc)
+rudolph = Rudolph(Rr,Rc,C)
+grid[Rr][Rc] = 1
+
 santa = []
 
 for _ in range(P):
     Si, Sr, Sc = tuple(input().split())
     santa.append(Santa(Sr,Sc,Si))
+    grid[Sr][Sc] = 2
+Santa.power = D
 
 for _ in range(M):
