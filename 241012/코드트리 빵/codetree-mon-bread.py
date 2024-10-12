@@ -1,5 +1,19 @@
-from collections import deque
+N, M = map(int, input().split())
+arr = [[1]*(N+2)]+[[1]+list(map(int,input().split()))+[1] for _ in range(N)]+[[1]*(N+2)]
 
+basecamp = set()                    # basecamp
+for i in range(1,N+1):
+    for j in range(1,N+1):
+        if arr[i][j]==1:
+            basecamp.add((i,j))
+            arr[i][j]=0
+
+store = {}                          # 편의점
+for m in range(1,M+1):
+    i,j = map(int, input().split())
+    store[m]=(i,j)
+
+from collections import deque
 def find(si,sj,dests):  # 시작좌표에서 목적지좌표들(set)중 최단거리 동일반경 리스트를 모두 찾기!
     q = deque()
     v = [[0]*(N+2) for _ in range(N+2)]
@@ -36,26 +50,25 @@ def solve():
 
     while q or time==1:    # 처음 또는 q에 데이터 있는동안(이동할 사람이 있는 동안) 실행
         nq = deque()
-        arrive_list = []
-        # [1] 모두 편의점방향 최단거리 이동 (이번 time만, 같은 반경)(이번 time만, 같은 반경)
+        alst = []
+        # [1] 모두 편의점방향 최단거리 이동 (이번 time만, 같은 반경)
         for ci,cj,m in q:
-            if arrived[m] == 0:
-                # 편의점 방향 최단거리 한칸 이동
-                # 편의점에서 시작, 현재 위치(상/하/좌/우 -> )
-                ni,nj = find(store[m][0],store[m][1],set(((ci-1,cj),(ci+1,cj),(ci,cj-1),(ci,cj+1))))
-
-                if(ni,nj) == store[m] :
-                    arrived[m] = time
-                    arrive_list.append((ni,nj))
+            if arrived[m]==0:   # 도착하지 않은 사람만 처리
+                # 편의점방향 최단거리(우선순위) 한 칸 이동
+                # 편의점에서 시작, 현재위치(상/하/좌/우 => dests (set) )
+                ni,nj=find(store[m][0],store[m][1],set(((ci-1,cj),(ci+1,cj),(ci,cj-1),(ci,cj+1))))
+                if (ni,nj)==store[m]:       # 최종 편의점에 도착
+                    arrived[m]=time
+                    alst.append((ni,nj))    # 통행금지는 모두 이동후 처리해야 함!!
                 else:
-                    nq.append((ni,nj,m))
-        q = nq
+                    nq.append((ni,nj,m))    # 계속 이동
+        q=nq
 
-        # [2] 편의점 도착처리 => arr[][]=1 (이동불가처리)              # 이동불가
-        if len(arrive_list) > 0:
-            for ai, aj in arrive_list:
-                arr[ai][aj] == 1
-                
+        # [2] 편의점 도착처리 => arr[][]=1 (이동불가처리)
+        if len(alst)>0:
+            for ai,aj in alst:
+                arr[ai][aj]=1               # 이동불가
+
         # [3] 시간번호의 멤버가 베이스캠프로 순간이동
         if time<=M:
             si,sj=store[time]
@@ -66,21 +79,6 @@ def solve():
 
         time+=1
     return max(arrived)
-    
-N, M = map(int, input().split())
-arr = [[1]*(N+2)]+[[1]+list(map(int,input().split()))+[1] for _ in range(N)]+[[1]*(N+2)]
-
-basecamp = set()                    # basecamp
-for i in range(1,N+1):
-    for j in range(1,N+1):
-        if arr[i][j]==1:
-            basecamp.add((i,j))
-            arr[i][j]=0
-
-store = {}                          # 편의점
-for m in range(1,M+1):
-    i,j = map(int, input().split())
-    store[m]=(i,j)
 
 ans = solve()
 print(ans)
