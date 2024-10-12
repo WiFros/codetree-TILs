@@ -1,69 +1,76 @@
-#방향: 상 우 하 좌
+# 방향: 상 우 하 좌
 di = [-1, 0, 1, 0]
 dj = [ 0, 1, 0,-1]
 
 N, M, Q = map(int, input().split())
-# 벽으로 둘러싸서, 범위체크 안하고, 범위밖으로 밀리지 않게 처리
-arr = [[2]*(N+2)]+[[2]+list(map(int, input().split()))+[2] for _ in range(N)]+[[2]*(N+2)]
+arr = [list(map(int, input().split())) for _ in range(N)]
 units = {}
 init_k = [0]*(M+1)
+final_k = [0]*(M+1)
+
 for m in range(1, M+1):
-    si,sj,h,w,k=map(int, input().split())
-    units[m]=[si,sj,h,w,k]
-    init_k[m]=k                 # 초기 체력 저장(ans 처리용)
+    si, sj, h, w, k = map(int, input().split())
+    units[m] = [si-1, sj-1, h, w, k]
+    init_k[m] = k
+    final_k[m] = k  # 초기 체력 저장
 
-def push_unit(start, dr):       # s를 밀고, 연쇄처리..
-    q = []                      # push 후보를 저장
-    pset = set()                # 이동 기사번호 저장
-    damage = [0]*(M+1)          # 각 유닛별 데미지 누적
+def push_unit(start, dr):
+    q = []
+    pset = set()
+    damage = [0] * (M+1)
+    intended_positions = {}
 
-    q.append(start)             # 초기데이터 append
+    q.append(start)
     pset.add(start)
 
     while q:
-        cur = q.pop(0)          # q에서 데이터 한개 꺼냄
-        ci,cj,h,w,k = units[cur]
+        cur = q.pop(0)
+        ci, cj, h, w, k = units[cur]
+        ni, nj = ci + di[dr], cj + dj[dr]
 
-        # 명령받은 방향진행, 벽이아니면, 겹치는 다른조각이면 => 큐에 삽입
-        ni,nj=ci+di[dr], cj+dj[dr]
+        # 범위 체크
+        if not (0 <= ni <= N - h and 0 <= nj <= N - w):
+            return  # 이동 취소
+
+        # 이동할 위치에 벽(2) 또는 함정(1)이 있는지 확인
         for i in range(ni, ni+h):
             for j in range(nj, nj+w):
-                if arr[i][j]==2:    # 벽!! => 모두 취소
-                    return
-                if arr[i][j]==1:    # 함정인 경우
-                    damage[cur]+=1  # 데미지 누적
+                if arr[i][j] == 2:
+                    return  # 이동 취소
+                if arr[i][j] == 1:
+                    damage[cur] += 1
 
-        # 겹치는 다른 유닛있는 경우 큐에 추가(모든 유닛 체크)
+        intended_positions[cur] = (ni, nj)
+
+        # 다른 유닛과 겹치는지 확인
         for idx in units:
-            if idx in pset: continue    # 이미 움직일 대상이면 체크할 필요없음
-
-            ti,tj,th,tw,tk=units[idx]
-            # 겹치는 경우
-            if ni<=ti+th-1 and ni+h-1>=ti and tj<=nj+w-1 and nj<=tj+tw-1:
+            if idx in pset:
+                continue
+            ti, tj, th, tw, tk = units[idx]
+            if ni <= ti + th - 1 and ni + h -1 >= ti and nj <= tj + tw -1 and nj + w -1 >= tj:
                 q.append(idx)
                 pset.add(idx)
 
-    # 명령 받은 기사는 데미지 입지 않음
-    damage[start]=0
+    # 명령받은 기사는 데미지 없음
+    damage[start] = 0
 
-
-    # 이동, 데미지가 체력이상이면 삭제처리
+    # 유닛 이동 및 데미지 처리
     for idx in pset:
-        si,sj,h,w,k = units[idx]
-
-        if k<=damage[idx]:  # 체력보다 더 큰 데미지면 삭제
+        si, sj, h, w, k = units[idx]
+        if k <= damage[idx]:
             units.pop(idx)
+            final_k[idx] = 0
         else:
-            ni,nj=si+di[dr], sj+dj[dr]
-            units[idx]=[ni,nj,h,w,k-damage[idx]]
+            ni, nj = intended_positions[idx]
+            units[idx] = [ni, nj, h, w, k - damage[idx]]
+            final_k[idx] = k - damage[idx]
 
-
-for _ in range(Q):  # 명령 입력받고 처리(있는 유닛만 처리)
+for _ in range(Q):
     idx, dr = map(int, input().split())
     if idx in units:
-        push_unit(idx, dr)      # 명령받은 기사(연쇄적으로 밀기: 벽이 없는 경우)
+        push_unit(idx, dr)
 
 ans = 0
-for idx in units:
-    ans += init_k[idx]-units[idx][4]
-print(ans)
+for idx in range(1, M+1):
+    ans += init_k[idx] - final_k[idx]
+print(ans-1)
