@@ -1,98 +1,69 @@
-from collections import deque
+#방향: 상 우 하 좌
+di = [-1, 0, 1, 0]
+dj = [ 0, 1, 0,-1]
 
-# 전역 변수들을 정의합니다.
-MAX_N = 31
-MAX_L = 41
-dx = [-1, 0, 1, 0]
-dy = [0, 1, 0, -1]
+N, M, Q = map(int, input().split())
+# 벽으로 둘러싸서, 범위체크 안하고, 범위밖으로 밀리지 않게 처리
+arr = [[2]*(N+2)]+[[2]+list(map(int, input().split()))+[2] for _ in range(N)]+[[2]*(N+2)]
+units = {}
+init_k = [0]*(M+1)
+for m in range(1, M+1):
+    si,sj,h,w,k=map(int, input().split())
+    units[m]=[si,sj,h,w,k]
+    init_k[m]=k                 # 초기 체력 저장(ans 처리용)
 
-info = [[0 for _ in range(MAX_L)] for _ in range(MAX_L)]
-bef_k = [0 for _ in range(MAX_N)]
-r = [0 for _ in range(MAX_N)]
-c = [0 for _ in range(MAX_N)]
-h = [0 for _ in range(MAX_N)]
-w = [0 for _ in range(MAX_N)]
-k = [0 for _ in range(MAX_N)]
-nr = [0 for _ in range(MAX_N)]
-nc = [0 for _ in range(MAX_N)]
-dmg = [0 for _ in range(MAX_N)]
-is_moved = [False for _ in range(MAX_N)]
+def push_unit(start, dr):       # s를 밀고, 연쇄처리..
+    q = []                      # push 후보를 저장
+    pset = set()                # 이동 기사번호 저장
+    damage = [0]*(M+1)          # 각 유닛별 데미지 누적
 
-
-# 움직임을 시도해봅니다.
-def try_movement(idx, dir):
-    q = deque()
-    is_pos = True
-
-    # 초기화 작업입니다.
-    for i in range(1, n + 1):
-        dmg[i] = 0
-        is_moved[i] = False
-        nr[i] = r[i]
-        nc[i] = c[i]
-
-    q.append(idx)
-    is_moved[idx] = True
+    q.append(start)             # 초기데이터 append
+    pset.add(start)
 
     while q:
-        x = q.popleft()
+        cur = q.pop(0)          # q에서 데이터 한개 꺼냄
+        ci,cj,h,w,k = units[cur]
 
-        nr[x] += dx[dir]
-        nc[x] += dy[dir]
+        # 명령받은 방향진행, 벽이아니면, 겹치는 다른조각이면 => 큐에 삽입
+        ni,nj=ci+di[dr], cj+dj[dr]
+        for i in range(ni, ni+h):
+            for j in range(nj, nj+w):
+                if arr[i][j]==2:    # 벽!! => 모두 취소
+                    return
+                if arr[i][j]==1:    # 함정인 경우
+                    damage[cur]+=1  # 데미지 누적
 
-        # 경계를 벗어나는지 체크합니다.
-        if nr[x] < 1 or nc[x] < 1 or nr[x] + h[x] - 1 > l or nc[x] + w[x] - 1 > l:
-            return False
+        # 겹치는 다른 유닛있는 경우 큐에 추가(모든 유닛 체크)
+        for idx in units:
+            if idx in pset: continue    # 이미 움직일 대상이면 체크할 필요없음
 
-        # 대상 조각이 다른 조각이나 장애물과 충돌하는지 검사합니다.
-        for i in range(nr[x], nr[x] + h[x]):
-            for j in range(nc[x], nc[x] + w[x]):
-                if info[i][j] == 1:
-                    dmg[x] += 1
-                if info[i][j] == 2:
-                    return False
+            ti,tj,th,tw,tk=units[idx]
+            # 겹치는 경우
+            if ni<=ti+th-1 and ni+h-1>=ti and tj<=nj+w-1 and nj<=tj+tw-1:
+                q.append(idx)
+                pset.add(idx)
 
-        # 다른 조각과 충돌하는 경우, 해당 조각도 같이 이동합니다.
-        for i in range(1, n + 1):
-            if is_moved[i] or k[i] <= 0:
-                continue
-            if r[i] > nr[x] + h[x] - 1 or nr[x] > r[i] + h[i] - 1:
-                continue
-            if c[i] > nc[x] + w[x] - 1 or nc[x] > c[i] + w[i] - 1:
-                continue
-
-            is_moved[i] = True
-            q.append(i)
-
-    dmg[idx] = 0
-    return True
+    # 명령 받은 기사는 데미지 입지 않음
+    damage[start]=0
 
 
-# 특정 조각을 지정된 방향으로 이동시키는 함수입니다.
-def move_piece(idx, move_dir):
-    if k[idx] <= 0:
-        return
+    # 이동, 데미지가 체력이상이면 삭제처리
+    for idx in pset:
+        si,sj,h,w,k = units[idx]
 
-    # 이동이 가능한 경우, 실제 위치와 체력을 업데이트합니다.
-    if try_movement(idx, move_dir):
-        for i in range(1, n + 1):
-            r[i] = nr[i]
-            c[i] = nc[i]
-            k[i] -= dmg[i]
+        if k<=damage[idx]:  # 체력보다 더 큰 데미지면 삭제
+            units.pop(idx)
+        else:
+            ni,nj=si+di[dr], sj+dj[dr]
+            units[idx]=[ni,nj,h,w,k-damage[idx]]
 
 
-# 입력값을 받습니다.
-l, n, q = map(int, input().split())
-for i in range(1, l + 1):
-    info[i][1:] = map(int, input().split())
-for i in range(1, n + 1):
-    r[i], c[i], h[i], w[i], k[i] = map(int, input().split())
-    bef_k[i] = k[i]
+for _ in range(Q):  # 명령 입력받고 처리(있는 유닛만 처리)
+    idx, dr = map(int, input().split())
+    if idx in units:
+        push_unit(idx, dr)      # 명령받은 기사(연쇄적으로 밀기: 벽이 없는 경우)
 
-for _ in range(q):
-    idx, d = map(int, input().split())
-    move_piece(idx, d)
-
-# 결과를 계산하고 출력합니다.
-ans = sum([bef_k[i] - k[i] for i in range(1, n + 1) if k[i] > 0])
+ans = 0
+for idx in units:
+    ans += init_k[idx]-units[idx][4]
 print(ans)
