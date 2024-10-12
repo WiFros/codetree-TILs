@@ -1,6 +1,3 @@
-import sys
-sys.stdin=open("input.txt","r")
-
 N, M, P, C, D = map(int, input().split())
 v = [[0]*N for _ in range(N)]
 
