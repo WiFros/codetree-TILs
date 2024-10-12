@@ -1,23 +1,4 @@
-import sys
-sys.stdin = open("input.txt","r")
-
-N, M = map(int, input().split())
-arr = [[1]*(N+2)]+[[1]+list(map(int,input().split()))+[1] for _ in range(N)]+[[1]*(N+2)]
-
-basecamp = set()                    # basecamp
-for i in range(1,N+1):
-    for j in range(1,N+1):
-        if arr[i][j]==1:
-            basecamp.add((i,j))
-            arr[i][j]=0
-
-store = {}                          # 편의점
-for m in range(1,M+1):
-    i,j = map(int, input().split())
-    store[m]=(i,j)
-
 from collections import deque
-
 
 def find(si,sj,dests):  # 시작좌표에서 목적지좌표들(set)중 최단거리 동일반경 리스트를 모두 찾기!
     q = deque()
@@ -85,6 +66,21 @@ def solve():
 
         time+=1
     return max(arrived)
+    
+N, M = map(int, input().split())
+arr = [[1]*(N+2)]+[[1]+list(map(int,input().split()))+[1] for _ in range(N)]+[[1]*(N+2)]
+
+basecamp = set()                    # basecamp
+for i in range(1,N+1):
+    for j in range(1,N+1):
+        if arr[i][j]==1:
+            basecamp.add((i,j))
+            arr[i][j]=0
+
+store = {}                          # 편의점
+for m in range(1,M+1):
+    i,j = map(int, input().split())
+    store[m]=(i,j)
 
 ans = solve()
 print(ans)
